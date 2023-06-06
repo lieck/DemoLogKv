@@ -14,6 +14,12 @@ pub enum KvsError {
 
     #[fail(display = "Unexpcetd command type")]
     UnexpectedCommandType,
+
+    #[fail(display = "InvalidRequest")]
+    InvalidRequest,
+
+    #[fail(display = "InvalidReply")]
+    InvalidReply
 }
 
 impl From<io::Error> for KvsError {

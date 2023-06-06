@@ -1,7 +1,7 @@
 use assert_cmd::prelude::*;
-use kvs::KvStore;
 use predicates::str::contains;
 use std::process::Command;
+use kvs::{KvStore, KvsEngine};
 
 // `kvs` with no args should exit with a non-zero code.
 #[test]
@@ -115,41 +115,49 @@ fn cli_invalid_subcommand() {
 // Should get previously stored value
 #[test]
 fn get_stored_value() {
-    let mut store = KvStore::new();
+    let mut store = KvStore::new(None);
 
-    store.set("key1".to_owned(), "value1".to_owned());
-    store.set("key2".to_owned(), "value2".to_owned());
+    store.set("key1".to_owned(), "value1".to_owned()).unwrap();
+    store.set("key2".to_owned(), "value2".to_owned()).unwrap();
 
-    assert_eq!(store.get("key1".to_owned()), Some("value1".to_owned()));
-    assert_eq!(store.get("key2".to_owned()), Some("value2".to_owned()));
+    assert_eq!(store.get("key1".to_owned()).unwrap(), Some("value1".to_owned()));
+    assert_eq!(store.get("key2".to_owned()).unwrap(), Some("value2".to_owned()));
 }
 
 // Should overwrite existent value
 #[test]
 fn overwrite_value() {
-    let mut store = KvStore::new();
+    let mut store = KvStore::new(None);
 
-    store.set("key1".to_owned(), "value1".to_owned());
-    assert_eq!(store.get("key1".to_owned()), Some("value1".to_owned()));
+    store.set("key1".to_owned(), "value1".to_owned()).unwrap();
+    assert_eq!(store.get("key1".to_owned()).unwrap(), Some("value1".to_owned()));
 
-    store.set("key1".to_owned(), "value2".to_owned());
-    assert_eq!(store.get("key1".to_owned()), Some("value2".to_owned()));
+    store.set("key1".to_owned(), "value2".to_owned()).unwrap();
+    assert_eq!(store.get("key1".to_owned()).unwrap(), Some("value2".to_owned()));
 }
 
 // Should get `None` when getting a non-existent key
 #[test]
 fn get_non_existent_value() {
-    let mut store = KvStore::new();
+    let mut store = KvStore::new(None);
 
-    store.set("key1".to_owned(), "value1".to_owned());
-    assert_eq!(store.get("key2".to_owned()), None);
+    store.set("key1".to_owned(), "value1".to_owned()).unwrap();
+    assert_eq!(store.get("key2".to_owned()).unwrap(), None);
 }
 
 #[test]
 fn remove_key() {
-    let mut store = KvStore::new();
+    let mut store = KvStore::new(None);
 
-    store.set("key1".to_owned(), "value1".to_owned());
-    store.remove("key1".to_owned());
-    assert_eq!(store.get("key1".to_owned()), None);
+    store.set("key1".to_owned(), "value1".to_owned()).unwrap();
+    store.remove("key1".to_owned()).unwrap();
+    assert_eq!(store.get("key1".to_owned()).unwrap(), None);
+}
+
+#[test]
+fn compacting_test() {
+    let mut store = KvStore::new(None);
+    for i in 0..10004 {
+        store.set(1.to_string(), i.to_string()).unwrap();
+    }
 }
